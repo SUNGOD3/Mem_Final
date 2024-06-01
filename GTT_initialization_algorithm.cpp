@@ -34,8 +34,8 @@ bool GTT_ok(vector <int> GTT, vector <vector <int> > P, int n, vector <vector <i
             ok[P[i][j]] = true;
     for(int i=0;i<n;++i)
         if(!ok[i])
-            return false;
-    for(int i=0;i<G.size();++i){
+			return false;
+    /*for(int i=0;i<G.size();++i){
         bool cnt = false;
         for(int j=0;j<GTT.size();++j){
             if(GTT[j]==i){
@@ -56,7 +56,7 @@ bool GTT_ok(vector <int> GTT, vector <vector <int> > P, int n, vector <vector <i
             if(cnt==0)
                 return false;
         }
-    }
+    }*/
     return true;
 }
 void pt(vector <int> GTT, vector <vector <int> > P, vector <vector <int>> G){
@@ -65,11 +65,18 @@ void pt(vector <int> GTT, vector <vector <int> > P, vector <vector <int>> G){
     for(int i=0;i<n;++i){
         m+=G[i].size();
         m2+=P[i].size();
+        if(n<10){
+        	cout << i << ": ";
+        	for(int j=0;j<P[i].size();++j){
+        		cout << P[i][j] << " ";
+			}
+			cout << "\n";
+		}
     }
-    cout << "GTT: ";
-    for(int i=0;i<GTT.size();++i)
-        cout << GTT[i]+1 << " ";
-    cout << "Page: \n";
+    cout << "GTT size: " << GTT.size() << "\n";
+    //for(int i=0;i<GTT.size();++i)
+    //    cout << GTT[i]+1 << " ";
+    //cout << "Page: \n";
     for(int i=0;i<P.size();++i){
         //cout << i+1 << ": ";
         for(int j=0;j<P[i].size();++j){
@@ -91,7 +98,7 @@ void pt(vector <int> GTT, vector <vector <int> > P, vector <vector <int>> G){
     cout << "data usage efficiency: ";
     cout << (double)((double)1 - ((double)(GTT.size() + m2) / (double)(n + m))) * 100.0 << "%\n";
     cout << "vertices are stored in GTT: " << (double)GTT.size()/n * 100.0 << "%\n";
-    cout << "page waste rate: " << (double)m2/(6*GTT.size()) * 100.0 << "%\n"; 
+    cout << "avg page used: " << (double)m2*2/GTT.size() << "\n"; 
     cout << "Duplicate data rate: " << ((double)(rp+m)/m - 1) * 100.0 << "%\n";
     return;
 }
@@ -154,6 +161,7 @@ void GTT_initialization_algorithm_2(vector <vector <int> > G, vector <vector <in
 	                    	st.insert({i,G[i][j]});
 	                    	st.insert({G[i][j],i});
 						}
+						GT.insert(G[i][j]); 
 	                }
 	                int b = G[i][t];
 	                for(int j=0;j<G[b].size();++j){
@@ -162,6 +170,7 @@ void GTT_initialization_algorithm_2(vector <vector <int> > G, vector <vector <in
 	                		st.insert({b,G[b][j]});
 	                    	st.insert({G[b][j],b});
 						}
+						GT.insert(G[b][j]);
 					}
 	                m-=G[i].size();
 	                m-=G[b].size();
@@ -175,14 +184,27 @@ void GTT_initialization_algorithm_2(vector <vector <int> > G, vector <vector <in
     if(GTT_ok(GTT, P, G.size(), cpG)==false)
         cout << "Wrong GTT\n";
     pt(GTT, P, cpG);
-    cout << GTT.size() << "\n";
     return;
 }
+void test(){
+	vector <vector <int> > G,P;
+    vector <int> GTT;
+	int n=5;
+	for(int i=0;i<n;++i){
+		G.push_back(GTT);
+		if(i<n-1)G[i].push_back(i+1);
+		P.push_back(GTT);
+	}
+	GTT_initialization_algorithm(G, P);
+    GTT_initialization_algorithm_2(G, P);
+}
 int main(){
+	test();
     int n;
     vector <vector <int> > G;
     vector <int> GTT;
     vector <vector <int> > P;
+    set <pair <int,int>> has;
     n = 1000;
     vector <int> rd_arr;
     for(int i=0;i<n;++i){
@@ -197,10 +219,11 @@ int main(){
     for(int i=0;i<50;++i){
         int x = rand()%n;
         int y = rand()%n;
-        if(x!=y){
-            G[x].push_back(y);
-            G[y].push_back(x);
-        }
+        if(x==y||has.count({x,y}))continue;
+        has.insert({x,y});
+        has.insert({y,x});
+		G[x].push_back(y);
+        G[y].push_back(x);
     }
     /*cin >> n;
     for(int i=0;i<n;++i){
@@ -220,8 +243,18 @@ int main(){
     }
     GTT_initialization_algorithm(G, P);
     GTT_initialization_algorithm_2(G, P);
+    for(int i=0;i<5000;++i){
+        int x = rand()%n;
+        int y = rand()%n;
+        if(x==y||has.count({x,y}))continue;
+        has.insert({x,y});
+        has.insert({y,x});
+		G[x].push_back(y);
+        G[y].push_back(x);
+    }
+    GTT_initialization_algorithm(G, P);
+    GTT_initialization_algorithm_2(G, P);
     return 0;
 }
 // 5 1 1 2 0 2 2 1 3 2 2 4 1 3 
-
 
